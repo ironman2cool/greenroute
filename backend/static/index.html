@@ -4,20 +4,22 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>GreenRoute</title>
+<meta name="description" content="A local-first AI router: answers on your device when it can, in the cloud only when it has to, and shows the energy and water it saved.">
 <style>
   :root {
     --bg: #ffffff; --bg-alt: #f5f5f7; --text: #1d1d1f; --muted: #6e6e73;
     --line: #d2d2d7; --card: #ffffff; --accent: #0071e3;
     --local: #1f9d55; --local-bg: #e8f7ee; --cloud: #0071e3; --cloud-bg: #e8f1fc;
-    --warn-bg: #fff6e0; --warn: #8a5a00; --nav: rgba(255,255,255,.72);
+    --warn-bg: #fff6e0; --warn: #8a5a00; --bad: #d70015; --nav: rgba(255,255,255,.72);
     --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Inter, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   }
   @media (prefers-color-scheme: dark) {
     :root {
       --bg: #000; --bg-alt: #101012; --text: #f5f5f7; --muted: #a1a1a6;
       --line: #2c2c2e; --card: #1c1c1e; --accent: #2997ff;
       --local: #30d158; --local-bg: #0f2a18; --cloud: #2997ff; --cloud-bg: #0b2038;
-      --warn-bg: #2e2410; --warn: #ffd60a; --nav: rgba(0,0,0,.72);
+      --warn-bg: #2e2410; --warn: #ffd60a; --bad: #ff453a; --nav: rgba(0,0,0,.72);
     }
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -25,6 +27,7 @@
   body { font-family: var(--font); background: var(--bg); color: var(--text);
          -webkit-font-smoothing: antialiased; line-height: 1.47; letter-spacing: -.01em; }
   a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
 
   /* Nav */
   nav { position: sticky; top: 0; z-index: 10; height: 48px; background: var(--nav);
@@ -33,8 +36,9 @@
   nav .in { max-width: 980px; margin: 0 auto; height: 100%; display: flex; align-items: center;
             justify-content: space-between; padding: 0 22px; font-size: 13px; }
   nav .logo { font-weight: 600; font-size: 17px; color: var(--text); }
+  nav .logo:hover { text-decoration: none; }
   nav .links a { color: var(--text); opacity: .8; margin-left: 24px; transition: opacity .2s; }
-  nav .links a:hover { opacity: 1; }
+  nav .links a:hover { opacity: 1; text-decoration: none; }
 
   section { padding: 120px 22px; }
   .wrap { max-width: 980px; margin: 0 auto; }
@@ -52,45 +56,71 @@
   .ctas { display: flex; gap: 16px; justify-content: center; margin-top: 36px; flex-wrap: wrap; }
   .btn { display: inline-block; padding: 12px 24px; border-radius: 980px; font-size: 17px; border: 0;
          cursor: pointer; font-family: inherit; transition: transform .2s, opacity .2s; }
+  .btn:hover { text-decoration: none; }
   .btn:active { transform: scale(.97); }
   .btn-primary { background: var(--accent); color: #fff; }
   .btn-link { color: var(--accent); background: none; }
   .btn-link::after { content: " ›"; }
 
   /* Stats */
-  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 60px; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 64px; }
   .stat { text-align: center; }
-  .stat .n { font-size: clamp(40px, 7vw, 64px); font-weight: 700; letter-spacing: -.03em;
-             font-variant-numeric: tabular-nums; transition: color .3s; }
+  .stat .n { font-size: clamp(32px, 5.5vw, 52px); font-weight: 700; letter-spacing: -.03em;
+             font-variant-numeric: tabular-nums; }
+  .stat .n small { font-size: .45em; font-weight: 600; color: var(--muted); margin-left: 2px; }
   .stat .l { color: var(--muted); font-size: 15px; }
-  .n.local { color: var(--local); } .n.cloud { color: var(--cloud); }
+  .n.local { color: var(--local); }
+  .stats-note { text-align: center; color: var(--muted); font-size: 13px; margin-top: 18px; }
 
   /* Chat */
   .chat { background: var(--card); border-radius: 28px; margin-top: 56px; overflow: hidden;
           box-shadow: 0 10px 40px rgba(0,0,0,.08); border: 1px solid var(--line); }
-  .modes { display: flex; justify-content: center; padding: 20px 20px 0; }
+  .bar-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
+             padding: 16px 20px; border-bottom: 1px solid var(--line); }
   .seg { display: inline-flex; background: var(--bg-alt); border-radius: 10px; padding: 3px; }
   .seg button { border: 0; background: none; font: inherit; font-size: 14px; color: var(--text);
-                padding: 6px 18px; border-radius: 8px; cursor: pointer; transition: background .25s, box-shadow .25s; }
+                padding: 6px 16px; border-radius: 8px; cursor: pointer; transition: background .25s, box-shadow .25s; }
   .seg button.on { background: var(--card); box-shadow: 0 1px 4px rgba(0,0,0,.12); font-weight: 600; }
-  .log { height: 440px; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px;
-         scroll-behavior: smooth; }
-  .empty { margin: auto; color: var(--muted); text-align: center; }
+  .toggles { display: flex; gap: 8px; flex-wrap: wrap; }
+  .tog { border: 1px solid var(--line); background: none; color: var(--muted); font: inherit; font-size: 13px;
+         padding: 6px 12px; border-radius: 980px; cursor: pointer; transition: all .2s; }
+  .tog[aria-pressed="true"] { background: var(--warn-bg); color: var(--warn); border-color: transparent; font-weight: 600; }
+  .log { height: 480px; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 18px; }
+  .empty { margin: auto; color: var(--muted); text-align: center; max-width: 560px; }
   .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 14px; }
   .chip { border: 1px solid var(--line); background: none; color: var(--text); font: inherit; font-size: 14px;
-          padding: 8px 14px; border-radius: 980px; cursor: pointer; transition: background .2s; }
+          padding: 8px 14px; border-radius: 980px; cursor: pointer; transition: background .2s; text-align: left; }
   .chip:hover { background: var(--bg-alt); }
-  .msg { max-width: 80%; animation: pop .35s cubic-bezier(.2,.8,.2,1); }
+  .chip b { font-weight: 600; }
+  .chip .to-local { color: var(--local); } .chip .to-cloud { color: var(--cloud); }
+  .msg { max-width: 82%; animation: pop .35s cubic-bezier(.2,.8,.2,1); }
   .msg.user { align-self: flex-end; background: var(--accent); color: #fff; padding: 10px 16px;
               border-radius: 20px 20px 4px 20px; white-space: pre-wrap; }
-  .msg.bot .bubble { background: var(--bg-alt); padding: 12px 16px; border-radius: 20px 20px 20px 4px; white-space: pre-wrap; }
+  .msg.bot .bubble { background: var(--bg-alt); padding: 12px 16px; border-radius: 20px 20px 20px 4px; overflow-wrap: anywhere; }
+  .bubble p { margin: 0 0 .6em; } .bubble p:last-child { margin-bottom: 0; }
+  .bubble h3, .bubble h4, .bubble h5 { margin: .8em 0 .3em; font-size: 1.05em; }
+  .bubble ul, .bubble ol { margin: .3em 0 .6em 1.3em; }
+  .bubble code { font-family: var(--mono); font-size: .9em; background: var(--card); padding: 1px 5px; border-radius: 5px; }
+  .bubble pre { background: var(--card); padding: 10px 12px; border-radius: 10px; overflow-x: auto; margin: .4em 0 .6em; }
+  .bubble pre code { padding: 0; background: none; }
   .meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin-top: 6px; }
   .badge { font-weight: 600; padding: 3px 10px; border-radius: 980px; font-size: 12px; }
   .badge.local { background: var(--local-bg); color: var(--local); }
   .badge.cloud { background: var(--cloud-bg); color: var(--cloud); }
+  .saved { color: var(--local); font-weight: 600; }
   .notice { background: var(--warn-bg); color: var(--warn); font-size: 13px; padding: 8px 12px;
             border-radius: 12px; margin-bottom: 6px; }
-  .err .bubble { color: #d70015; }
+  .err .bubble { color: var(--bad); }
+  details.why { font-size: 13px; color: var(--muted); margin-top: 6px; }
+  details.why summary { cursor: pointer; width: fit-content; }
+  .why-body { margin-top: 8px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; }
+  .why-body .reason { color: var(--text); margin-bottom: 8px; }
+  .checks { list-style: none; display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; }
+  .checks .ok { color: var(--local); } .checks .no { color: var(--bad); }
+  .meter { position: relative; height: 6px; background: var(--bg-alt); border-radius: 3px; margin: 10px 0 4px; }
+  .meter i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; }
+  .meter b { position: absolute; top: -4px; width: 2px; height: 14px; background: var(--text); }
+  .signals { margin-top: 8px; font-size: 12px; }
   .offer { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 20px 22px;
            max-width: 460px; box-shadow: 0 4px 20px rgba(0,0,0,.06); }
   .offer h4 { font-size: 19px; letter-spacing: -.02em; margin-bottom: 6px; }
@@ -107,13 +137,15 @@
   .typing span { display: inline-block; width: 7px; height: 7px; margin: 0 2px; border-radius: 50%;
                  background: var(--muted); animation: blink 1.2s infinite; }
   .typing span:nth-child(2) { animation-delay: .2s; } .typing span:nth-child(3) { animation-delay: .4s; }
-  form.input { display: flex; gap: 10px; padding: 16px; border-top: 1px solid var(--line); }
-  form.input input { flex: 1; border: 1px solid var(--line); background: var(--bg); color: var(--text);
-                     border-radius: 980px; padding: 12px 20px; font: inherit; font-size: 16px; outline: none;
-                     transition: border-color .2s, box-shadow .2s; }
-  form.input input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 20%, transparent); }
-  form.input button { width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--accent);
-                      color: #fff; font-size: 20px; cursor: pointer; transition: opacity .2s, transform .2s; }
+  .preview { font-size: 13px; color: var(--muted); padding: 10px 24px 0; min-height: 30px; transition: opacity .2s; }
+  .preview .to-local { color: var(--local); font-weight: 600; } .preview .to-cloud { color: var(--cloud); font-weight: 600; }
+  form.input { display: flex; gap: 10px; padding: 10px 16px 16px; }
+  form.input textarea { flex: 1; border: 1px solid var(--line); background: var(--bg); color: var(--text);
+                        border-radius: 22px; padding: 11px 20px; font: inherit; font-size: 16px; outline: none; resize: none;
+                        max-height: 160px; line-height: 1.4; transition: border-color .2s, box-shadow .2s; }
+  form.input textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 20%, transparent); }
+  form.input button { width: 44px; height: 44px; flex: none; align-self: flex-end; border-radius: 50%; border: 0;
+                      background: var(--accent); color: #fff; font-size: 20px; cursor: pointer; transition: opacity .2s; }
   form.input button:disabled { opacity: .35; cursor: default; }
 
   /* How it works */
@@ -122,6 +154,21 @@
   .step .num { font-size: 15px; font-weight: 600; color: var(--muted); }
   .step h3 { font-size: 24px; letter-spacing: -.02em; margin: 8px 0; }
   .step p { color: var(--muted); font-size: 16px; }
+  .rules { margin: 40px auto 0; max-width: 720px; background: var(--card); border: 1px solid var(--line);
+           border-radius: 24px; padding: 28px 32px; }
+  .rules h3 { font-size: 20px; margin-bottom: 12px; }
+  .rules ol { margin-left: 20px; color: var(--muted); }
+  .rules li { margin: 6px 0; } .rules li b { color: var(--text); font-weight: 600; }
+
+  /* Impact */
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 56px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 24px; padding: 28px; }
+  .card h3 { font-size: 20px; letter-spacing: -.02em; margin-bottom: 8px; }
+  .card p, .card li { color: var(--muted); font-size: 15px; }
+  .card ul { margin-left: 18px; }
+  .card .big { font-size: 28px; font-weight: 700; color: var(--text); letter-spacing: -.02em; margin: 6px 0; }
+  .card code { font-family: var(--mono); font-size: 13px; color: var(--text); }
+  .fine { text-align: center; color: var(--muted); font-size: 13px; margin-top: 28px; max-width: 720px; margin-inline: auto; }
 
   /* Device */
   .specs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
@@ -133,7 +180,7 @@
   .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
   .install { max-width: 620px; margin: 20px auto 0; background: var(--card); border: 1px solid var(--line);
              border-radius: 18px; padding: 20px 24px; font-size: 15px; }
-  .install li { margin: 6px 0 6px 18px; } .install code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 14px; }
+  .install li { margin: 6px 0 6px 18px; }
 
   footer { padding: 40px 22px; text-align: center; color: var(--muted); font-size: 12px; border-top: 1px solid var(--line); }
 
@@ -143,13 +190,14 @@
   @keyframes pop { from { opacity: 0; transform: translateY(8px) scale(.98); } }
   @keyframes blink { 0%, 80%, 100% { opacity: .25; } 40% { opacity: 1; } }
   @media (prefers-reduced-motion: reduce) {
-    html, .log { scroll-behavior: auto; } .reveal { opacity: 1; transform: none; transition: none; }
+    html { scroll-behavior: auto; } .reveal { opacity: 1; transform: none; transition: none; }
     .msg { animation: none; }
   }
   @media (max-width: 734px) {
-    section { padding: 80px 16px; } nav .links a { margin-left: 14px; }
-    .steps { grid-template-columns: 1fr; } .stats { gap: 8px; } .msg { max-width: 92%; }
-    .log { height: 60vh; } .specs { grid-template-columns: repeat(2, 1fr); }
+    section { padding: 80px 16px; } nav .links a { margin-left: 12px; } nav .links .opt { display: none; }
+    .steps, .cards { grid-template-columns: 1fr; } .stats { grid-template-columns: repeat(2, 1fr); gap: 28px 8px; }
+    .msg { max-width: 94%; } .log { height: 62vh; padding: 16px; } .specs { grid-template-columns: repeat(2, 1fr); }
+    .preview { padding: 10px 16px 0; }
   }
 </style>
 </head>
@@ -157,7 +205,7 @@
 
 <nav><div class="in">
   <a class="logo" href="#top">GreenRoute</a>
-  <div class="links"><a href="#try">Try it</a><a href="#how">How it works</a><a href="#device">Your device</a></div>
+  <div class="links"><a href="#try">Try it</a><a href="#how">How it works</a><a href="#impact">Impact</a><a class="opt" href="#device">Your device</a></div>
 </div></nav>
 
 <section class="hero" id="top">
@@ -165,39 +213,52 @@
     <p class="eyebrow reveal">GreenRoute</p>
     <h1 class="reveal">AI that stays<br><span class="grad">close to home.</span></h1>
     <p class="lede reveal">Most AI requests don't need a data center. GreenRoute answers on your device when it can,
-      and goes to the cloud only when it has to.</p>
+      goes to the cloud only when it has to, and shows you what that saved.</p>
     <div class="ctas reveal">
       <a class="btn btn-primary" href="#try">Try it</a>
       <a class="btn btn-link" href="#how">See how it works</a>
     </div>
     <div class="stats reveal">
-      <div class="stat"><div class="n local" id="s-local">0</div><div class="l">answered on-device</div></div>
-      <div class="stat"><div class="n cloud" id="s-cloud">0</div><div class="l">sent to the cloud</div></div>
-      <div class="stat"><div class="n" id="s-pct">–</div><div class="l">kept local</div></div>
+      <div class="stat"><div class="n local" id="s-share">–</div><div class="l" id="s-share-l">answered on-device</div></div>
+      <div class="stat"><div class="n" id="s-wh">0<small>Wh</small></div><div class="l">energy saved</div></div>
+      <div class="stat"><div class="n" id="s-water">0<small>mL</small></div><div class="l">water saved</div></div>
+      <div class="stat"><div class="n" id="s-co2">0<small>g</small></div><div class="l">CO₂e avoided</div></div>
     </div>
+    <p class="stats-note reveal">Compared with sending every request to the cloud. Estimates — <a href="#impact">see how they're calculated</a>.</p>
   </div>
 </section>
 
 <section class="alt" id="try">
   <div class="wrap">
     <h2 class="reveal">Ask anything.</h2>
-    <p class="lede reveal">Every answer shows where it ran and why.</p>
+    <p class="lede reveal">Every answer shows where it ran, why, and what it saved.</p>
     <div class="chat reveal">
-      <div class="modes"><div class="seg" id="modes">
-        <button data-m="auto" class="on">Auto</button><button data-m="local">Local</button><button data-m="cloud">Cloud</button>
-      </div></div>
-      <div class="log" id="log">
-        <div class="empty" id="empty">
-          Try one of these:
-          <div class="chips">
-            <button class="chip">What's the capital of Japan?</button>
-            <button class="chip">Summarize: The meeting moved to Friday at 3pm in room B.</button>
-            <button class="chip">Write a detailed 5-paragraph essay on renewable energy policy.</button>
-          </div>
+      <div class="bar-top">
+        <div class="seg" id="modes" role="group" aria-label="Routing mode">
+          <button data-m="auto" class="on">Auto</button><button data-m="local">Local</button><button data-m="cloud">Cloud</button>
+        </div>
+        <div class="toggles" aria-label="Simulate device conditions">
+          <button class="tog" id="t-lowspec" aria-pressed="false" title="Pretend this is a weak device">Low-spec device</button>
+          <button class="tog" id="t-battery" aria-pressed="false" title="Pretend the battery is at 12% and unplugged">Low battery</button>
         </div>
       </div>
+      <div class="log" id="log" aria-live="polite">
+        <div class="empty" id="empty">
+          Try the demo moments, or type your own:
+          <div class="chips">
+            <button class="chip" data-p="What's the capital of Japan?"><b>Simple question</b> <span class="to-local">→ on-device</span></button>
+            <button class="chip" data-p="Summarize in one sentence: The quarterly review moved from Thursday to Friday at 3pm because the finance team needs another day to close the books. Please bring your updated forecasts.">
+              <b>Quick summary</b> <span class="to-local">→ on-device</span></button>
+            <button class="chip" data-p="Write a detailed 5-paragraph essay on how renewable energy policy affects electricity prices."><b>Long essay</b> <span class="to-cloud">→ cloud</span></button>
+            <button class="chip" data-p="Compare REST and GraphQL for a mobile app backend, with trade-offs."><b>Analysis</b> <span class="to-cloud">→ cloud</span></button>
+            <button class="chip" data-p="Generate an image of a cat wearing a raincoat."><b>Image request</b> <span class="to-cloud">→ cloud</span></button>
+          </div>
+          <p class="pstat" style="margin-top:14px">Then switch on <b>Low-spec device</b> and ask the simple question again.</p>
+        </div>
+      </div>
+      <div class="preview" id="preview"></div>
       <form class="input" id="form">
-        <input id="prompt" placeholder="Message GreenRoute" autocomplete="off">
+        <textarea id="prompt" rows="1" placeholder="Message GreenRoute" autocomplete="off" aria-label="Message"></textarea>
         <button id="send" type="submit" aria-label="Send" disabled>↑</button>
       </form>
     </div>
@@ -210,16 +271,50 @@
     <p class="lede reveal">Other routers ask which cloud model to use. GreenRoute first asks whether the request needs to leave your device at all.</p>
     <div class="steps">
       <div class="step reveal"><div class="num">01</div><h3>What is it?</h3>
-        <p>Classify the task, whether it's a quick fact, a summary, code or long-form writing, and estimate how complex it is.</p></div>
+        <p>A rules engine labels the task (Q&amp;A, summary, code, essay, image…) and scores its complexity from 0 to 1 using length and cues like "detailed" or "1500 words".</p></div>
       <div class="step reveal"><div class="num">02</div><h3>Can this device do it?</h3>
-        <p>Check RAM, GPU, battery and whether a local model is installed and running.</p></div>
+        <p>It checks the local model's size, free memory, battery and input length. A 1B model gets a lower complexity limit than a 3B one.</p></div>
       <div class="step reveal"><div class="num">03</div><h3>Where should it run?</h3>
-        <p>Run it locally by default. Use the cloud only when the task really needs it, and say why.</p></div>
+        <p>On-device by default. The cloud only when a check fails — and the failed check becomes the reason you see.</p></div>
+    </div>
+    <div class="rules reveal">
+      <h3>The checks, in order</h3>
+      <ol>
+        <li><b>Task type</b> — image generation can't run on a local text model.</li>
+        <li><b>Device mode</b> — a low-spec device would be too slow.</li>
+        <li><b>Battery</b> — under 20% and unplugged, offload to save power.</li>
+        <li><b>Input length</b> — long documents are slow on laptop CPUs.</li>
+        <li><b>Confidence</b> — if the request can't be classified, play it safe.</li>
+        <li><b>Complexity</b> — the score must be within the local model's limit.</li>
+        <li><b>Memory</b> — enough free RAM to load the model.</li>
+      </ol>
     </div>
   </div>
 </section>
 
-<section class="alt" id="device">
+<section class="alt" id="impact">
+  <div class="wrap">
+    <h2 class="reveal">The honest math.</h2>
+    <p class="lede reveal">Each answer is compared with the cloud baseline. Local isn't free — it costs your device's electricity — so savings are net.</p>
+    <div class="cards">
+      <div class="card reveal"><h3>Cloud baseline</h3>
+        <div class="big">0.24 Wh · 0.26 mL · 0.03 g</div>
+        <p>Energy, water and CO₂e of a median Gemini text prompt, measured by Google across chips, hosts, idle capacity and cooling.</p></div>
+      <div class="card reveal"><h3>On-device cost</h3>
+        <div class="big" id="a-local">25 W × time</div>
+        <p>Extra power while generating × measured generation time. Carbon uses your grid's intensity (<span id="a-grid">458</span> gCO₂/kWh). No data-center cooling water.</p></div>
+      <div class="card reveal"><h3>Savings</h3>
+        <div class="big">baseline − actual</div>
+        <p>Per answer, added up across all requests. A slow answer on a power-hungry machine can cost more than the cloud — and would show as negative.</p></div>
+    </div>
+    <p class="fine reveal">These are estimates, not measurements. Google's figure is a median for its own prompts and models; yours will differ. Water used by power plants is left out on both sides.
+      Sources: <a href="https://cloud.google.com/blog/products/infrastructure/measuring-the-environmental-impact-of-ai-inference" target="_blank" rel="noopener">Google Cloud, Aug 2025</a> ·
+      <a href="https://ourworldindata.org/grapher/carbon-intensity-electricity" target="_blank" rel="noopener">Ember via Our World in Data</a>.
+      <br><button class="btn btn-link btn-sm" id="reset" style="margin-top:10px">Reset counters</button></p>
+  </div>
+</section>
+
+<section id="device">
   <div class="wrap">
     <h2 class="reveal">Your device.</h2>
     <p class="lede reveal">What GreenRoute sees on this machine right now.</p>
@@ -229,32 +324,16 @@
   </div>
 </section>
 
-<footer>GreenRoute: local-first AI routing. Local runs on Ollama; the cloud fallback is Google Gemini.</footer>
+<footer>GreenRoute — local-first AI routing. Local models run on Ollama; the cloud fallback is Google Gemini.
+  · <a href="https://github.com/ironman2cool/Powered_by_caffeine" target="_blank" rel="noopener">Source on GitHub</a></footer>
 
 <script>
 const $ = (s) => document.querySelector(s);
-const log = $("#log"), input = $("#prompt"), send = $("#send");
+const log = $("#log"), input = $("#prompt"), send = $("#send"), preview = $("#preview");
 let mode = "auto", busy = false;
-const counts = { local: 0, cloud: 0 };
+const sim = { lowSpec: false, battery: false };
 
-// Scroll reveal
-const io = new IntersectionObserver((es) => es.forEach((e) => {
-  if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
-}), { threshold: 0.15 });
-document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
-
-// Mode toggle
-$("#modes").addEventListener("click", (e) => {
-  const b = e.target.closest("button"); if (!b) return;
-  mode = b.dataset.m;
-  document.querySelectorAll("#modes button").forEach((x) => x.classList.toggle("on", x === b));
-});
-
-document.querySelectorAll(".chip").forEach((c) =>
-  c.addEventListener("click", () => { input.value = c.textContent; ask(); }));
-input.addEventListener("input", () => { send.disabled = busy || !input.value.trim(); });
-$("#form").addEventListener("submit", (e) => { e.preventDefault(); ask(); });
-
+// ---- Small helpers ------------------------------------------------------------
 function el(tag, cls, text) {
   const n = document.createElement(tag);
   if (cls) n.className = cls;
@@ -262,19 +341,115 @@ function el(tag, cls, text) {
   return n;
 }
 function scrollDown() { log.scrollTop = log.scrollHeight; }
-
-function bump(id, value) {
-  const n = $(id); n.textContent = value;
-  n.animate([{ transform: "scale(1.15)" }, { transform: "scale(1)" }], { duration: 400, easing: "ease-out" });
+function device() {
+  const d = {};
+  if (sim.lowSpec) d.low_spec = true;
+  if (sim.battery) Object.assign(d, { on_battery: true, battery_pct: 12 });
+  return d;
 }
-function updateStats(decision) {
-  counts[decision]++;
-  bump("#s-" + decision, counts[decision]);
-  const total = counts.local + counts.cloud;
-  bump("#s-pct", Math.round((counts.local / total) * 100) + "%");
+const fmt = (v, digits) => (Math.abs(v) < 1e-9 ? 0 : v).toFixed(digits);
+
+// Minimal Markdown -> HTML. Every piece of text is escaped first, so model output can't inject HTML.
+function md(src) {
+  const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const inline = (s) => esc(s)
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/(^|[^*\w])\*([^*\n]+)\*(?!\w)/g, "$1<em>$2</em>");
+  const out = []; let list = null, code = null;
+  const closeList = () => { if (list) { out.push(`</${list}>`); list = null; } };
+  for (const raw of src.split("\n")) {
+    if (raw.trim().startsWith("```")) {
+      if (code === null) { closeList(); code = []; }
+      else { out.push(`<pre><code>${esc(code.join("\n"))}</code></pre>`); code = null; }
+      continue;
+    }
+    if (code !== null) { code.push(raw); continue; }
+    const li = raw.match(/^\s*([-*•]|\d+[.)])\s+(.*)/);
+    if (li) {
+      const t = /\d/.test(li[1]) ? "ol" : "ul";
+      if (list !== t) { closeList(); out.push(`<${t}>`); list = t; }
+      out.push(`<li>${inline(li[2])}</li>`); continue;
+    }
+    closeList();
+    const h = raw.match(/^(#{1,4})\s+(.*)/);
+    if (h) out.push(`<h${h[1].length + 2}>${inline(h[2])}</h${h[1].length + 2}>`);
+    else if (raw.trim()) out.push(`<p>${inline(raw)}</p>`);
+  }
+  if (code !== null) out.push(`<pre><code>${esc(code.join("\n"))}</code></pre>`);
+  closeList();
+  return out.join("");
 }
 
-// ---- Local model offer --------------------------------------------------
+// ---- Scroll reveal --------------------------------------------------------------
+const io = new IntersectionObserver((es) => es.forEach((e) => {
+  if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+}), { threshold: 0.12 });
+document.querySelectorAll(".reveal").forEach((n) => io.observe(n));
+
+// ---- Controls -------------------------------------------------------------------
+$("#modes").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  mode = b.dataset.m;
+  document.querySelectorAll("#modes button").forEach((x) => x.classList.toggle("on", x === b));
+  schedulePreview();
+});
+for (const [id, key] of [["#t-lowspec", "lowSpec"], ["#t-battery", "battery"]]) {
+  $(id).addEventListener("click", (e) => {
+    sim[key] = !sim[key];
+    e.currentTarget.setAttribute("aria-pressed", String(sim[key]));
+    schedulePreview();
+  });
+}
+document.querySelectorAll(".chip").forEach((c) =>
+  c.addEventListener("click", () => { input.value = c.dataset.p; autosize(); ask(); }));
+function autosize() { input.style.height = "auto"; input.style.height = Math.min(input.scrollHeight, 160) + "px"; }
+input.addEventListener("input", () => { autosize(); send.disabled = busy || !input.value.trim(); schedulePreview(); });
+input.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); ask(); } });
+$("#form").addEventListener("submit", (e) => { e.preventDefault(); ask(); });
+
+// ---- Live route preview: what the router would do with the text typed so far -----
+let previewTimer = null, previewSeq = 0;
+function schedulePreview() {
+  clearTimeout(previewTimer);
+  const text = input.value.trim();
+  if (!text) { preview.textContent = ""; return; }
+  previewTimer = setTimeout(async () => {
+    const seq = ++previewSeq;
+    try {
+      const r = await fetch("/route", { method: "POST", headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify({ prompt: text, route: mode, device: device() }) });
+      const d = await r.json();
+      if (seq !== previewSeq || !r.ok) return;
+      preview.innerHTML = "";
+      const where = d.decision === "local" ? "on-device" : "to the cloud";
+      preview.append("↳ Would run ", el("span", "to-" + d.decision, where), " · " + d.reason);
+    } catch { /* preview is best-effort */ }
+  }, 250);
+}
+
+// ---- Counters ------------------------------------------------------------------
+function showStats(s) {
+  if (!s) return;
+  const set = (id, html) => { const n = $(id); if (n.innerHTML !== html) { n.innerHTML = html;
+    n.animate([{ transform: "scale(1.12)" }, { transform: "scale(1)" }], { duration: 400, easing: "ease-out" }); } };
+  set("#s-share", s.requests ? Math.round(s.local_share * 100) + "%" : "–");
+  $("#s-share-l").textContent = s.requests ? `answered on-device (${s.local} of ${s.requests})` : "answered on-device";
+  set("#s-wh", fmt(s.saved.wh, 2) + "<small>Wh</small>");
+  set("#s-water", fmt(s.saved.water_ml, 2) + "<small>mL</small>");
+  set("#s-co2", fmt(s.saved.gco2e, 3) + "<small>g</small>");
+}
+async function loadStats() {
+  try {
+    const s = await (await fetch("/stats")).json();
+    showStats(s);
+    $("#a-local").textContent = `${s.assumptions.device_active_watts} W × time`;
+    $("#a-grid").textContent = s.assumptions.grid_gco2_per_kwh;
+  } catch { /* server down: device panel shows it */ }
+}
+$("#reset").addEventListener("click", async () => { showStats(await (await fetch("/stats/reset", { method: "POST" })).json()); });
+
+// ---- Local model offer -----------------------------------------------------------
 let setup = null;  // /setup payload
 const CHOICE_KEY = "greenroute-local-choice";
 function getChoice() { try { return localStorage.getItem(CHOICE_KEY); } catch { return null; } }
@@ -302,7 +477,7 @@ async function downloadModel(host) {
     await loadSetup();
     return true;
   } catch (e) {
-    bar.remove(); stat.className = "pstat"; stat.style.color = "#d70015";
+    bar.remove(); stat.className = "pstat"; stat.style.color = "var(--bad)";
     stat.textContent = "Download failed: " + e.message;
     return false;
   }
@@ -344,7 +519,6 @@ function offerLocal() {
       card.append(el("div", ok ? "pstat done" : "pstat", ok ? `✓ Using ${have} on this device` : "Couldn't switch models. Using the cloud."));
       scrollDown(); resolve(ok ? "local" : "cloud");
     };
-
     no.onclick = () => {
       setChoice("cloud"); row.remove();
       card.append(el("div", "pstat", "OK, using the cloud. You can change this anytime under “Your device”."));
@@ -367,43 +541,113 @@ function offerLocal() {
   });
 }
 
+// ---- One reply: badge, notice, streamed text, "why" panel, impact line -------------
+function replyView() {
+  const bot = el("div", "msg bot");
+  const bubble = el("div", "bubble typing");
+  bubble.innerHTML = "<span></span><span></span><span></span>";
+  const meta = el("div", "meta");
+  const why = el("details", "why");
+  bot.append(bubble, meta, why);
+  log.append(bot); scrollDown();
+  let text = "", frame = 0;
+  return {
+    bot,
+    route(d, simulated) {
+      bot.querySelector(".notice")?.remove();
+      if (d.notice && getChoice() !== "cloud") bot.prepend(el("div", "notice", d.notice));
+      meta.innerHTML = "";
+      const where = d.decision === "local" ? (simulated ? "Local (simulated)" : "On-device") : "Cloud";
+      meta.append(el("span", "badge " + d.decision, `${where} · ${d.model}`));
+      renderWhy(why, d);
+    },
+    note(t) { bot.insertBefore(el("div", "notice", t), bubble); },
+    reset() { text = ""; bubble.className = "bubble typing"; bubble.innerHTML = "<span></span><span></span><span></span>"; },
+    token(t) {
+      text += t;
+      if (!frame) frame = requestAnimationFrame(() => {
+        frame = 0; bubble.className = "bubble"; bubble.innerHTML = md(text); scrollDown();
+      });
+    },
+    done(d) {
+      cancelAnimationFrame(frame); frame = 0;
+      bubble.className = "bubble"; bubble.innerHTML = md(text || "(empty reply)");
+      meta.append(el("span", null, `${(d.latency_ms / 1000).toFixed(1)}s`));
+      const s = d.impact.saved;
+      if (d.decision === "local" && !d.simulated)
+        meta.append(el("span", "saved", `saved ≈ ${fmt(s.wh, 2)} Wh · ${fmt(s.water_ml, 2)} mL water · ${fmt(s.gco2e, 3)} g CO₂e`));
+      else meta.append(el("span", null, `≈ ${d.impact.actual.wh} Wh in the cloud`));
+    },
+    error(msg) { bot.classList.add("err"); bubble.className = "bubble"; bubble.textContent = msg; },
+  };
+}
+
+function renderWhy(why, d) {
+  why.innerHTML = "";
+  why.append(el("summary", null, "Why?"));
+  const body = el("div", "why-body");
+  body.append(el("div", "reason", d.reason));
+  const c = d.details?.classification;
+  if (c) {
+    const cap = (setup && setup.capability) || 0.35;
+    const meter = el("div", "meter"), fill = el("i"), mark = el("b");
+    fill.style.width = (c.complexity * 100) + "%";
+    fill.style.background = c.complexity <= cap ? "var(--local)" : "var(--cloud)";
+    mark.style.left = (cap * 100) + "%"; mark.title = "local model limit";
+    meter.append(fill, mark);
+    body.append(el("div", null, `${c.label} · complexity ${c.complexity.toFixed(2)} (bar) vs local limit ${cap.toFixed(2)} (mark)`), meter);
+  }
+  const list = el("ul", "checks");
+  for (const ch of d.details?.checks || []) {
+    list.append(el("li", ch.ok ? "ok" : "no", ch.ok ? "✓" : "✗"), el("li", null, `${ch.name} — ${ch.detail}`));
+  }
+  body.append(list);
+  if (c && c.signals.length) body.append(el("div", "signals", "Signals: " + c.signals.join(" · ")));
+  why.append(body);
+}
+
+// ---- Send a message (streams NDJSON events from /chat/stream) ----------------------
 async function ask() {
   const prompt = input.value.trim();
   if (!prompt || busy) return;
-  busy = true; send.disabled = true; input.value = "";
+  busy = true; send.disabled = true; input.value = ""; autosize();
+  clearTimeout(previewTimer); previewSeq++; preview.textContent = "";
   $("#empty")?.remove();
 
   log.append(el("div", "msg user", prompt)); scrollDown();
   if (needsOffer()) await offerLocal();
 
-  const bot = el("div", "msg bot");
-  const bubble = el("div", "bubble typing");
-  bubble.innerHTML = "<span></span><span></span><span></span>";
-  bot.append(bubble); log.append(bot); scrollDown();
-
+  const view = replyView();
   try {
-    const r = await fetch("/chat", { method: "POST", headers: { "Content-Type": "application/json" },
-                                     body: JSON.stringify({ prompt, route: mode }) });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.detail || "Request failed");
-
-    if (d.notice && getChoice() !== "cloud") bot.prepend(el("div", "notice", d.notice));
-    bubble.className = "bubble"; bubble.textContent = d.response;
-    const meta = el("div", "meta");
-    const where = d.decision === "local" ? (d.simulated ? "Local (simulated)" : "On-device") : "Cloud";
-    meta.append(el("span", "badge " + d.decision, `${where} · ${d.model}`),
-                el("span", null, d.reason),
-                el("span", null, `${(d.latency_ms / 1000).toFixed(1)}s`));
-    bot.append(meta);
-    updateStats(d.decision);
+    const r = await fetch("/chat/stream", { method: "POST", headers: { "Content-Type": "application/json" },
+                                            body: JSON.stringify({ prompt, route: mode, device: device() }) });
+    if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.detail?.[0]?.msg || d.detail || "Request failed"); }
+    const reader = r.body.getReader(), dec = new TextDecoder();
+    let buf = "";
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      let i;
+      while ((i = buf.indexOf("\n")) >= 0) {
+        const line = buf.slice(0, i); buf = buf.slice(i + 1);
+        if (!line.trim()) continue;
+        const ev = JSON.parse(line);
+        if (ev.type === "decision") view.route(ev, false);
+        else if (ev.type === "fallback") { if (ev.reset) view.reset(); view.route(ev, ev.simulated); }
+        else if (ev.type === "token") view.token(ev.text);
+        else if (ev.type === "note") view.note(ev.text);
+        else if (ev.type === "done") { view.done(ev); showStats(ev.stats); }
+        else if (ev.type === "error") throw new Error(ev.detail);
+      }
+    }
   } catch (err) {
-    bot.classList.add("err"); bubble.className = "bubble";
-    bubble.textContent = err.message === "Failed to fetch" ? "Can't reach the GreenRoute server. Is it running?" : err.message;
+    view.error(err.message === "Failed to fetch" ? "Can't reach the GreenRoute server. Is it running?" : err.message);
   }
   busy = false; send.disabled = !input.value.trim(); scrollDown(); input.focus();
 }
 
-// ---- Device panel -------------------------------------------------------
+// ---- Device panel ---------------------------------------------------------------
 async function loadSetup() {
   try {
     setup = await (await fetch("/setup")).json();
@@ -416,7 +660,7 @@ async function loadSetup() {
     ["RAM", `${s.ram_gb} GB`], ["Free RAM", `${s.ram_free_gb} GB`],
     ["CPU cores", s.cpu_cores], ["GPU", s.gpus.join(", ") || "None detected"],
     ["Battery", s.battery_pct == null ? "N/A" : `${s.battery_pct}%${s.on_battery ? " · on battery" : ""}`],
-    ["Recommended", rec.model || "Cloud only"],
+    ["Local model", L.model_ready ? `${L.model} (limit ${setup.capability.toFixed(2)})` : (rec.model ? `${rec.model} recommended` : "Cloud only")],
   ];
   const specs = $("#specs"); specs.innerHTML = "";
   rows.forEach(([k, v]) => { const c = el("div", "spec"); c.append(el("div", "k", k), el("div", "v", v)); specs.append(c); });
@@ -452,6 +696,7 @@ async function loadSetup() {
   host.append(box);
 }
 loadSetup();
+loadStats();
 </script>
 </body>
 </html>
