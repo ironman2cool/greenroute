@@ -51,13 +51,27 @@ def system_specs() -> dict:
     }
 
 
+def live_specs() -> dict:
+    """The cheap, fast-changing readings the router checks on every request (no GPU probe)."""
+    battery = psutil.sensors_battery() if hasattr(psutil, "sensors_battery") else None
+    return {
+        "ram_free_gb": round(psutil.virtual_memory().available / 1024**3, 1),
+        "battery_pct": battery.percent if battery else None,
+        "on_battery": (not battery.power_plugged) if battery else False,
+    }
+
+
 def recommend_model(specs: dict) -> dict:
-    ram = specs["ram_gb"]
+    """Pick by total RAM, but step down when little is free: a 3B model on a machine with
+    2 GB free pages to disk and becomes slower than the cloud round trip it was meant to save."""
+    ram, free = specs["ram_gb"], specs.get("ram_free_gb", specs["ram_gb"])
     if ram < 4:
         return {"model": None, "size_gb": 0, "why": f"{ram} GB RAM is too little for a local LLM - cloud only."}
-    if ram < 8:
-        return {"model": "llama3.2:1b", "size_gb": 1.3, "why": f"{ram} GB RAM - the 1B model fits comfortably."}
-    return {"model": "llama3.2:3b", "size_gb": 2.0, "why": f"{ram} GB RAM - the 3B model is a good speed/quality balance."}
+    if ram < 8 or free < 3:
+        return {"model": "llama3.2:1b", "size_gb": 1.3,
+                "why": f"{ram} GB RAM ({free} GB free) - the 1B model fits comfortably."}
+    return {"model": "llama3.2:3b", "size_gb": 2.0,
+            "why": f"{ram} GB RAM ({free} GB free) - the 3B model is a good speed/quality balance."}
 
 
 def ollama_binary() -> str | None:
@@ -69,25 +83,45 @@ def ollama_binary() -> str | None:
     return None
 
 
-def ollama_models() -> list[str] | None:
-    """Installed model names, or None if the server isn't responding."""
+def _ollama_get(path: str) -> list[dict] | None:
     try:
-        r = httpx.get(f"{config.OLLAMA_URL}/api/tags", timeout=2)
+        r = httpx.get(f"{config.OLLAMA_URL}{path}", timeout=2)
         r.raise_for_status()
-        return [m["name"] for m in r.json().get("models", [])]
+        return r.json().get("models", [])
     except (httpx.HTTPError, ValueError):
         return None
+
+
+def ollama_models() -> list[str] | None:
+    """Installed model names, or None if the server isn't responding."""
+    tags = _ollama_get("/api/tags")
+    return None if tags is None else [m["name"] for m in tags]
+
+
+def loaded_models() -> list[str]:
+    """Models Ollama currently holds in memory (they need no extra RAM to answer)."""
+    return [m["name"] for m in (_ollama_get("/api/ps") or [])]
 
 
 def _has_model(models: list[str], wanted: str) -> bool:
     return any(m == wanted or m == f"{wanted}:latest" for m in models)
 
 
+def _params_b(size: str | None) -> float | None:
+    """'1.2B' -> 1.2, '7.2B' -> 7.2, '500M' -> 0.5"""
+    try:
+        return float(size[:-1]) / (1000 if size.upper().endswith("M") else 1)
+    except (TypeError, ValueError):
+        return None
+
+
 def ollama_status() -> dict:
     binary = ollama_binary()
-    models = ollama_models()
+    tags = _ollama_get("/api/tags")
+    models = None if tags is None else [m["name"] for m in tags]
     running = models is not None
     ready = running and _has_model(models, config.LOCAL_MODEL)
+    info = next((m for m in tags or [] if m["name"] in (config.LOCAL_MODEL, f"{config.LOCAL_MODEL}:latest")), {})
     if ready:
         msg = f"Local model {config.LOCAL_MODEL} is ready."
     elif running:
@@ -103,6 +137,9 @@ def ollama_status() -> dict:
         "models": models or [],
         "model": config.LOCAL_MODEL,
         "model_ready": ready,
+        "loaded": ready and _has_model(loaded_models(), config.LOCAL_MODEL),
+        "model_params_b": _params_b(info.get("details", {}).get("parameter_size")),
+        "model_size_gb": round(info["size"] / 1e9, 1) if info.get("size") else None,
         "message": msg,
     }
 
