@@ -623,7 +623,7 @@ async function ask() {
                                             body: JSON.stringify({ prompt, route: mode, device: device() }) });
     if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.detail?.[0]?.msg || d.detail || "Request failed"); }
     const reader = r.body.getReader(), dec = new TextDecoder();
-    let buf = "";
+    let buf = "", finished = false;
     for (;;) {
       const { value, done } = await reader.read();
       if (done) break;
@@ -637,10 +637,11 @@ async function ask() {
         else if (ev.type === "fallback") { if (ev.reset) view.reset(); view.route(ev, ev.simulated); }
         else if (ev.type === "token") view.token(ev.text);
         else if (ev.type === "note") view.note(ev.text);
-        else if (ev.type === "done") { view.done(ev); showStats(ev.stats); }
+        else if (ev.type === "done") { finished = true; view.done(ev); showStats(ev.stats); }
         else if (ev.type === "error") throw new Error(ev.detail);
       }
     }
+    if (!finished) throw new Error("The answer was cut off - the connection to the server closed early.");
   } catch (err) {
     view.error(err.message === "Failed to fetch" ? "Can't reach the GreenRoute server. Is it running?" : err.message);
   }

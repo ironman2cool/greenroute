@@ -236,6 +236,9 @@ def _events(req: ChatRequest) -> Iterator[str]:
     except cloud_backend.CloudError as e:
         yield line({"type": "error", "detail": str(e)})
         return
+    except Exception as e:  # never leave the client waiting on a half-finished stream
+        yield line({"type": "error", "detail": f"Unexpected error: {e}"})
+        return
 
     seconds = time.perf_counter() - t0
     served = "cloud" if simulated else decision.decision
