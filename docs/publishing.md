@@ -1,9 +1,9 @@
 # Publishing GreenRoute
 
 The repo is the evidence, the article is the story, and a short post points people to both. The
-article was drafted with AI assistance, so every venue below was chosen because its published
-policy **accepts AI-assisted writing that is disclosed and fact-checked**. Policies were checked on
-2026-10-10; re-read them before submitting, they change.
+article was drafted with AI assistance, so the venues below are grouped by what their published
+policies say about **AI-assisted writing that is disclosed and fact-checked**: accepted, ask first,
+or rejected. Policies were checked on 2026-10-10; re-read them before submitting, because they change.
 
 **Before you publish anywhere:** read the article end to end, change anything that doesn't sound
 like you, and keep the disclosure paragraph near the top. Every venue below requires or rewards
