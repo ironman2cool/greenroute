@@ -1,0 +1,130 @@
+{
+  "n": 60,
+  "local_model": "llama3.2:1b",
+  "cloud_model": "gemma-4-26b-a4b-it",
+  "judge_model": "gemma-4-26b-a4b-it",
+  "assumptions": {
+    "device_active_watts": 25.0,
+    "grid_gco2_per_kwh": 458.0,
+    "cloud_per_prompt": {
+      "wh": 0.24,
+      "gco2e": 0.03,
+      "water_ml": 0.26
+    }
+  },
+  "routing": {
+    "accuracy_pct": 95.0,
+    "correct": 57,
+    "confusion": {
+      "local->local": 35,
+      "local->cloud": 3,
+      "cloud->local": 0,
+      "cloud->cloud": 22
+    },
+    "local_share_pct": 58.3,
+    "misses": [
+      {
+        "prompt": "What does the Python len() function do?",
+        "expected": "local",
+        "decision": "cloud",
+        "task": "code",
+        "complexity": 0.48
+      },
+      {
+        "prompt": "Write a SQL query to select all rows from a table called users where age is over 30.",
+        "expected": "local",
+        "decision": "cloud",
+        "task": "code",
+        "complexity": 0.48
+      },
+      {
+        "prompt": "Write a short, professional email to my landlord asking them to fix the heating.",
+        "expected": "local",
+        "decision": "cloud",
+        "task": "unknown",
+        "complexity": 0.3
+      }
+    ]
+  },
+  "quality": {
+    "judged": 58,
+    "routed_local": {
+      "n": 35,
+      "acceptable_pct": 85.7,
+      "mean_score": 4.43
+    },
+    "routed_cloud": {
+      "n": 23,
+      "local_acceptable_pct": 17.4,
+      "mean_score": 2.04
+    },
+    "all_local_acceptable_pct": 58.6,
+    "weak_local_answers": [
+      {
+        "prompt": "TL;DR: \"Our team shipped the new login page, fixed two payment bugs, and pushed the analyt",
+        "score": 2,
+        "why": "The candidate answer misrepresents the reason for the delay, changing the specific technical blocker (data pipeline) into a vague, inaccurate statement about ensuring readiness."
+      },
+      {
+        "prompt": "Fix the grammar: \"Me and him goes to the store yesterday and buyed three apple.\"",
+        "score": 2,
+        "why": "The candidate failed to correct the subject pronouns, leaving 'Me and him' which is grammatically incorrect."
+      },
+      {
+        "prompt": "Translate \"Where is the train station?\" into Spanish.",
+        "score": 2,
+        "why": "The candidate only translates part of the requested sentence, omitting the 'Where is' component."
+      },
+      {
+        "prompt": "How do you say \"good night\" in German?",
+        "score": 2,
+        "why": "While the candidate provides the correct phrase, it includes several incorrect translations and a grammatically wrong variation, which is misleading to a learner."
+      },
+      {
+        "prompt": "Extract the date and time from: \"Let's meet next Tuesday, June 3rd, at 2:30pm in the lobby",
+        "score": 2,
+        "why": "The candidate failed to extract the specific date, providing only the day of the week and omitting 'June 3rd'."
+      }
+    ]
+  },
+  "latency_s": {
+    "local_median_routed_local": 4.4,
+    "local_p90_routed_local": 12.8,
+    "cloud_median_same_prompts": 5.82,
+    "local_tokens_per_s_median": 12.2
+  },
+  "energy": {
+    "all_cloud": {
+      "wh": 14.4,
+      "gco2e": 1.8,
+      "water_ml": 15.6
+    },
+    "greenroute": {
+      "wh": 7.538,
+      "gco2e": 1.455,
+      "water_ml": 6.5
+    },
+    "greenroute_with_retries": {
+      "wh": 8.738,
+      "gco2e": 1.605,
+      "water_ml": 7.8
+    },
+    "saving_pct": {
+      "wh": 47.6,
+      "gco2e": 19.2,
+      "water_ml": 58.3
+    },
+    "saving_with_retries_pct": {
+      "wh": 39.3,
+      "gco2e": 10.9,
+      "water_ml": 50.0
+    },
+    "breakeven_device_watts": 136,
+    "energy_saving_pct_by_watts": {
+      "10": 54.1,
+      "25": 47.6,
+      "60": 32.7,
+      "150": -5.8
+    }
+  }
+}
