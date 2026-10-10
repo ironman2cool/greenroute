@@ -9,33 +9,56 @@ policy **accepts AI-assisted writing that is disclosed and fact-checked**. Polic
 like you, and keep the disclosure paragraph near the top. Every venue below requires or rewards
 it, and "I can vouch for every number" is exactly what they ask for.
 
-## Where to publish, in order
+## Where to publish
 
-| # | Venue | Audience | AI policy (checked 2026-10-10) | Why it's here |
-|---|---|---|---|---|
-| 1 | **[DEV (dev.to)](https://dev.to)** | Developers | Allowed with disclosure (a note anywhere in the post, or the `#abotwrotethis` tag) and fact-checking; no promotion of a business ([guidelines](https://dev.to/guidelines-for-ai-assisted-articles-on-dev)) | Publish here first. Markdown-native; `article.md` already has DEV front matter. |
-| 2 | **[Towards AI](https://towardsai.com/contribute/)** (Medium publication) | AI/ML practitioners | Follows Medium's rules: disclose AI-generated text **within the first two paragraphs**; check all AI output | An edited publication: being accepted gives you a "published in Towards AI" credit for your CV. LLM applications and evaluation are core topics. |
-| 3 | **[Hashnode](https://hashnode.com)** (your own blog) | Developers | "AI-generated content is permitted, but you must review and take responsibility for everything you publish" ([code of conduct](https://hashnode.com/code-of-conduct)) | Your own blog, optionally on your own domain, so nobody can reject it. Set its canonical URL to the DEV post. |
-| 4 | **[Green Software Foundation](https://github.com/Green-Software-Foundation/writers)** articles | Green-software / climate-tech professionals | No AI rule published; wants evidence-based, non-promotional pieces of 500–1,200 words | The best climate-tech audience. Use `article-gsf.md` (the short version), disclose AI use in your pitch, and ask first. |
-| 5 | **[HackerNoon](https://hackernoon.com)** (optional) | Tech general | Reviews disclosed AI-assisted stories but says it "neither accept[s] nor encourage[s] the use of AI to generate text" and runs AI detection ([policy](https://hackernoon.com/the-right-way-to-use-ai-on-hackernoon)) | Large audience, but the least likely to accept. Only try it after you've rewritten the article in your own words. |
+### A. Platforms you control (no editor can reject it)
 
-**Communities to share the link in** (not publications, so no editorial rejection): Hacker News
-*Show HN*, Reddit r/LocalLLaMA and r/ClimateTech, the
-[ClimateAction.tech](https://climateaction.tech) Slack, and LinkedIn.
+| Venue | AI policy (checked 2026-10-10) | Notes |
+|---|---|---|
+| **[DEV (dev.to)](https://dev.to)** | Allowed with a disclosure note (or the `#abotwrotethis` tag) and fact-checking; no promoting a business ([guidelines](https://dev.to/guidelines-for-ai-assisted-articles-on-dev)) | **Publish here first** and use it as the original (canonical) copy. `article.md` already has DEV front matter. |
+| **[Medium](https://medium.com)** (your own profile) | AI-assisted writing is allowed if disclosed **within the first two paragraphs** (done). Disclosed AI writing gets *General* distribution but not curator *Boost*, and can't go behind the Partner Program paywall. Undisclosed AI writing is limited to your followers ([Medium policy](https://help.medium.com/hc/en-us/articles/22576852947223), as reported by [Plagiarism Today](https://www.plagiarismtoday.com/?p=42690)) | The best-known general blog platform. Use *Import a story* with the DEV URL so it's marked as a copy. Leave it outside the paywall. |
+| **[Hashnode](https://hashnode.com)** | "AI-generated content is permitted, but you must review and take responsibility for everything you publish" ([code of conduct](https://hashnode.com/code-of-conduct)) | Your own developer blog, optionally on your own domain. Set its canonical URL to the DEV post. |
+| **[Substack](https://substack.com)** | No official AI policy; Substack says it doesn't remove content for being AI-made ([WIRED via eWeek](https://www.eweek.com/news/top-substack-newsletters-use-ai-tech/)) | Good if you want a newsletter for follow-up posts. Keep the disclosure anyway. |
+| **LinkedIn article** | No editorial review | Reaches your professional network directly; link back to the DEV post. |
 
-**Skip these:** Towards Data Science says it publishes "human authors only" and rejects posts
-"written in whole or in part by AI tools". The EGU climate blogs ban AI-produced writing. Branch
-Magazine (ClimateAction.tech) welcomes this topic, but its last open call (Issue 9) closed in April
-2025. Watch [its open-call page](https://branch.climateaction.tech/open-call-for-contributions/) for the
-next one.
+### B. Edited publications that accept disclosed AI-assisted writing
+
+| Venue | AI policy | Notes |
+|---|---|---|
+| **[Towards AI](https://towardsai.com/contribute/)** (Medium publication) | Follows Medium's rules: disclose in the first two paragraphs, verify all AI output | **Best CV credit.** LLM applications and evaluation are core topics; aim for 850+ words. Submit the Medium draft (see step 3). |
+
+### C. Ask first (no published AI policy, so disclose in your pitch)
+
+| Venue | Audience | Notes |
+|---|---|---|
+| **[Green Software Foundation](https://github.com/Green-Software-Foundation/writers)** | Green-software / climate-tech professionals | **Best climate audience.** Wants evidence-based, non-promotional pieces of 500–1,200 words: send `article-gsf.md` with the pitch below. |
+| **[Planet Forward](https://planetforward.org)** | Environmental innovation (run with George Washington University) | Takes contributor stories of 1,200–2,000 words. Pitch the full article. |
+| **[Level Up Coding](https://levelup.gitconnected.com/how-to-get-published-on-gitconnected-dac547ef556b)** (Medium publication) | Large general programming audience | Email submit@gitconnected.com with your Medium draft link; mention the AI disclosure. Decisions take up to a week. |
+| **[HackerNoon](https://hackernoon.com)** | General tech | Reviews disclosed AI-assisted stories, but says it "neither accept[s] nor encourage[s] the use of AI to generate text" and runs AI detection ([policy](https://hackernoon.com/the-right-way-to-use-ai-on-hackernoon)). A long shot; only try it after rewriting the article in your own words. |
+
+### D. Skip: these reject AI-written articles
+
+- **Towards Data Science**: "human authors only"; no posts "written in whole or in part by AI tools".
+- **DZone**: "articles partially or fully created using AI tools… are not allowed"
+  ([guidelines](https://dzone.com/pages/submission-guidelines)).
+- **The New Stack**: [won't publish AI-written articles](https://thenewstack.io/why-the-new-stack-wont-give-you-ai-written-articles/).
+- **EGU climate blogs**: ban AI-produced writing.
+- **freeCodeCamp News**: its style guide reportedly rejects "AI dump" content. I couldn't confirm the
+  exact rule, so assume no.
+
+**Watch:** Branch Magazine (ClimateAction.tech) is a perfect climate-tech fit, but its last open
+call (Issue 9) closed in April 2025. Check [its open-call page](https://branch.climateaction.tech/open-call-for-contributions/)
+for the next one.
+
+**Communities to share the link in** (not publications): Hacker News *Show HN*, Reddit
+r/LocalLLaMA and r/ClimateTech, and the [ClimateAction.tech](https://climateaction.tech) Slack.
 
 ## Step by step
 
 ### 1. GitHub (do this first; every article links here)
 
-1. Optional but recommended: rename the repo to `greenroute` (*Settings → General → Repository
-   name*). GitHub redirects the old URL; then replace `Powered_by_caffeine` in `README.md` and
-   `docs/*.md`.
+1. Rename the repo to `greenroute` (*Settings → General → Repository name*). The links in this
+   repo already point to `github.com/ironman2cool/greenroute`, and GitHub redirects the old URL.
 2. *About* box (gear icon): description *"Local-first AI router: answers on-device when it can, in
    the cloud when it must, and shows the energy and water it saved."* Topics: `llm`, `ollama`,
    `gemini`, `green-ai`, `green-software`, `sustainability`, `fastapi`, `llm-router`.
@@ -47,12 +70,12 @@ next one.
 `published: false` to `true` → publish. Add the tags it suggests (`ai`, `llm`, `sustainability`,
 `python`).
 
-### 3. Towards AI
+### 3. Medium and Towards AI
 
 Import the DEV post into Medium (*Import a story* → paste the DEV URL; this sets the canonical
 link), keep it as a **draft**, check the disclosure is in the first two paragraphs, then *⋯ →
 Submit to publication → Towards AI → Send for review*. If there's no reply in 72 hours, it wasn't
-accepted this time; publish it on your own Medium profile instead.
+accepted this time; publish it on your own Medium profile instead (outside the paywall).
 
 ### 4. Hashnode
 

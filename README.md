@@ -5,7 +5,7 @@ other LLM routers skip: *does this request need to leave the device at all?* Sim
 answered by a small model on your own machine; demanding ones go to the cloud. Every answer shows
 where it ran, why, and an estimate of the energy and water it saved.
 
-[![tests](https://github.com/ironman2cool/Powered_by_caffeine/actions/workflows/tests.yml/badge.svg)](https://github.com/ironman2cool/Powered_by_caffeine/actions/workflows/tests.yml)
+[![tests](https://github.com/ironman2cool/greenroute/actions/workflows/tests.yml/badge.svg)](https://github.com/ironman2cool/greenroute/actions/workflows/tests.yml)
 ![python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![license](https://img.shields.io/badge/license-MIT-green)
 

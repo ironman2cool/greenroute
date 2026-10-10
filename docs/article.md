@@ -2,7 +2,7 @@
 title: "Should this prompt leave your laptop? Building a local-first AI router and doing the honest math"
 published: false
 tags: ai, llm, sustainability, python
-cover_image: https://raw.githubusercontent.com/ironman2cool/Powered_by_caffeine/main/docs/images/hero.png
+cover_image: https://raw.githubusercontent.com/ironman2cool/greenroute/main/docs/images/hero.png
 ---
 
 # Should this prompt leave your laptop?
@@ -27,7 +27,7 @@ what it saved. It started as a weekend hackathon prototype; this is the version 
 afterwards, with a real router, real local inference, a benchmark, and numbers I'm willing to
 defend.
 
-![GreenRoute's chat: a simple question answered on-device, with the reason and the estimated saving](https://raw.githubusercontent.com/ironman2cool/Powered_by_caffeine/main/docs/images/chat.png)
+![GreenRoute's chat: a simple question answered on-device, with the reason and the estimated saving](https://raw.githubusercontent.com/ironman2cool/greenroute/main/docs/images/chat.png)
 
 ## What it does
 
@@ -104,7 +104,7 @@ sides so the comparison stays like-for-like.
 more than the cloud would have, the saving shows up as negative. I wanted the tool to be able to
 say "this one wasn't worth it".
 
-![Methodology section of the app](https://raw.githubusercontent.com/ironman2cool/Powered_by_caffeine/main/docs/images/impact.png)
+![Methodology section of the app](https://raw.githubusercontent.com/ironman2cool/greenroute/main/docs/images/impact.png)
 
 ## Results
 
@@ -132,7 +132,7 @@ The five weak answers it let through are instructive: a grammar fix that left "M
 untouched, two translations, a date extraction that dropped "June 3rd", and a TL;DR that changed the
 reason a project had slipped. For a 1B model, "simple" isn't the same as "safe".
 
-![Local answer quality against the router's complexity score](https://raw.githubusercontent.com/ironman2cool/Powered_by_caffeine/main/docs/images/quality_vs_complexity.png)
+![Local answer quality against the router's complexity score](https://raw.githubusercontent.com/ironman2cool/greenroute/main/docs/images/quality_vs_complexity.png)
 
 **Footprint.** Compared with sending all 60 prompts to the cloud, GreenRoute's estimated footprint
 was 48% lower in energy (7.5 vs 14.4 Wh), 58% lower in water (6.5 vs 15.6 mL) and 19% lower in
@@ -148,7 +148,7 @@ The energy result depends heavily on the device. Routing locally stops saving en
 (around 10 W) is far below that; a gaming desktop pushing a GPU at 150 W is not, and would have
 used about 6% *more* energy than the all-cloud baseline.
 
-![Estimated energy, water and CO2e for the 60 prompts](https://raw.githubusercontent.com/ironman2cool/Powered_by_caffeine/main/docs/images/footprint.png)
+![Estimated energy, water and CO2e for the 60 prompts](https://raw.githubusercontent.com/ironman2cool/greenroute/main/docs/images/footprint.png)
 
 **Speed.** On my laptop the 1B model answered the prompts it handled in a median 4.4 seconds (90th
 percentile 12.8 s), at about 12 tokens per second. The free Gemma 4 endpoint I used for the reference
@@ -191,7 +191,7 @@ judge prompt and every raw answer are in the repo so anyone can check or rerun t
 
 ## Try it
 
-The code is on GitHub: **[ironman2cool/Powered_by_caffeine](https://github.com/ironman2cool/Powered_by_caffeine)**.
+The code is on GitHub: **[ironman2cool/greenroute](https://github.com/ironman2cool/greenroute)**.
 It runs on Windows, macOS and Linux with a free Gemini key; Ollama is optional. The benchmark,
 the prompts, the judge prompts and every result are in the repo, so you can check my numbers or
 run them on your own machine.

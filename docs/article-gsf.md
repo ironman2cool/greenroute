@@ -80,4 +80,4 @@ a carbon-aware router could make a different call when the grid is running on co
 running on solar. Finally, the same decision matters even more on phones, where the battery is the
 constraint and NPUs make small models cheap.
 
-Code, data and the full write-up: https://github.com/ironman2cool/Powered_by_caffeine
+Code, data and the full write-up: https://github.com/ironman2cool/greenroute
