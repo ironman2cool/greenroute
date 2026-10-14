@@ -34,7 +34,7 @@ laptop (Intel Core i5-1135G7, 12 GB RAM, no GPU). Every prompt was also answered
 
 Full tables: [`benchmark/results/summary.md`](backend/benchmark/results/summary.md). Every prompt,
 answer and judge verdict: [`results.jsonl`](backend/benchmark/results/results.jsonl).
-Write-up: [`docs/article.md`](docs/article.md).
+Write-up: [`docs/article.md`](docs/article.md) · Publishing plan: [`docs/action-plan.md`](docs/action-plan.md).
 
 ## Why
 

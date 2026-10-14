@@ -1,10 +1,3 @@
----
-title: "Should this prompt leave your laptop? Building a local-first AI router and doing the honest math"
-published: false
-tags: ai, llm, sustainability, python
-cover_image: https://raw.githubusercontent.com/ironman2cool/greenroute/main/docs/images/hero.png
----
-
 # Should this prompt leave your laptop?
 
 *Building a local-first AI router, and doing the honest math on what it saves.*
