@@ -6,6 +6,7 @@ worked. Tick the boxes as you go. Total time: about 3–4 hours spread over a we
 Files you'll use:
 - `docs/article.md`: the article (read and edit this one)
 - `docs/publish/dev.md`: the same article with DEV's settings block, ready to paste
+- `docs/publish/medium.html`: the same article as a web page to copy into Medium
 - `docs/article-gsf.md`: the short (~1,000-word) version for climate outlets
 - `docs/publishing.md`: why each venue was chosen, and each one's AI policy
 
@@ -24,8 +25,9 @@ you to stand behind every claim, and interviewers will ask about it.
       agreement, 86% vs 17% acceptable, 48% / 58% / 19% savings, ~136 W break-even.
 - [ ] Keep the **AI disclosure** box near the top. Medium and Towards AI require it within the first
       two paragraphs.
-- [ ] If you changed `article.md`, make the same edits in `docs/publish/dev.md` (it's the same text
-      below its settings block). Or send me the edited file and I'll sync them.
+- [ ] If you changed `article.md`, rebuild the DEV and Medium copies from it: in the `backend`
+      folder run `.venv\Scripts\python toolsuild_article_copies.py`. (Or send me the edited
+      file and I'll do it.)
 
 **0.2 Polish the GitHub repo** (github.com/ironman2cool/greenroute)
 
@@ -67,12 +69,17 @@ Towards AI is an edited publication, so acceptance gives you a "Published in Tow
 1. [ ] Create a Medium account (https://medium.com), with your real name and a one-line bio.
 2. [ ] Go to https://medium.com/towards-artificial-intelligence and click **Follow**. Towards AI
        asks contributors to follow it before submitting.
-3. [ ] Import the DEV article: profile picture → **Stories → Import a story**, or go straight to
-       https://medium.com/p/import. Paste your DEV URL and click **Import**. Medium marks the copy
-       as originally published on DEV.
-4. [ ] In the imported **draft** (don't publish it yet):
+3. [ ] **Don't use "Import a story"**: it drops the images and breaks the lines. Paste instead:
+   - Open `docs/publish/medium.html` in Chrome or Edge (double-click it).
+   - Press **Ctrl+A**, then **Ctrl+C**.
+   - On Medium, click **Write**, click into the title area, and press **Ctrl+V**. The title,
+     headings, lists, links and all 4 images paste in. Delete any empty line left at the very top.
+4. [ ] In the **draft** (don't publish it yet):
    - Check the **AI disclosure** box is still within the first two paragraphs.
-   - Check the images came through. If one didn't, drag it in from `docs/images/`.
+   - Check all 4 images are there (the chat screenshot, the methodology section and both charts).
+     If one is missing, drag it in from `docs/images/`.
+   - Mark DEV as the original: **⋯ → More settings → Advanced settings → "This story was
+     originally published elsewhere"** → paste your DEV URL → Save.
    - Add up to 5 topics: `Artificial Intelligence`, `LLM`, `Sustainability`, `Green Tech`, `Python`.
    - **Don't** put it behind the paywall. Medium doesn't allow AI-assisted stories in the Partner Program.
 5. [ ] Click **⋯ → Submit to publication → Towards AI → Send for review**. (If that option doesn't
