@@ -51,8 +51,9 @@ DEV is where the article is "born". Every other copy points back to it.
        `docs/publish/dev.md`, including the block between the `---` lines.
 4. [ ] If the editor asks for an **AI disclosure level**, choose **AI-assisted**.
 5. [ ] Click **Preview**. Check that the cover image, both charts and the screenshots appear.
-6. [ ] Click **Publish**. (Or change `published: false` to `published: true` in the settings block,
-       then save.)
+6. [ ] Click **Save changes**. In the Basic markdown editor there is no Publish button: the line
+       `published: true` in the settings block is what publishes it. (If you see "Unpublished
+       Post", that line says `false`: click **Click to edit**, change it to `true`, and save.)
 7. [ ] Copy the article's URL; you'll need it in every later step. Write it here: ______________
 
 **Done when:** the article is live with its images, and the URL works in a private browser window.
