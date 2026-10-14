@@ -161,33 +161,33 @@ LLM, and it also wrote the reference answers. The local power draw is an assumpt
 measurement, and Google's figure is a median for its own traffic and models. The prompts, labels,
 judge prompt and every raw answer are in the repo so anyone can check or rerun them.
 
-## What surprised me
-
-- **The free tier is tiny.** Gemini 2.5 Flash's free tier allowed my key 20 requests a day, and I
-  used that up in an afternoon of testing. So the cloud side became a fallback chain: when one model
-  is out of quota, overloaded or retired, the request moves to the next one and the reply says which
-  model answered. Gemma 4 on the same API had much higher limits but returned intermittent 500
-  errors, so the benchmark retries those.
-- **"Wrong number of tensors."** The laptop's Ollama install was a 2024 version that couldn't load
-  Llama 3.2 at all. Upgrading fixed it, but "just run it locally" has a maintenance cost of its own.
-- **Image requests failed silently.** Asked to "generate an image", the cloud text model returned
-  nothing at all. Now the router flags image requests, and the cloud model is told it can't draw and
-  should describe the image instead, with a notice to the user.
-- **The honest number changed the story.** Google's 0.24 Wh per prompt is far smaller than the
-  estimates I started the hackathon with. That shrank the per-prompt saving, and pushed me to add net
-  accounting and the break-even point, which turned out to be the most interesting part of the
-  project.
-
 ## What I'd do next
 
-- **Measure, don't assume, the local power draw.** Intel RAPL counters on Linux and `powermetrics`
-  on macOS can report real package power; the 25 W default is the weakest number in the system.
-- **Carbon-aware routing.** Grid intensity changes by the hour. A router that knows the grid is
-  running on coal right now could make a different call than one at midday on solar.
-- **A learned classifier**, trained on routing decisions and judge scores, with the rules kept as a
-  fallback and as the explanation layer.
-- **Phones and NPUs.** The same decision matters even more on a phone, where the battery is the
-  constraint and on-device NPUs make small models cheap.
+The decision itself should stay what it is now: a handful of cheap rules that run in under a
+millisecond and can be explained in one sentence. The work is in making those rules more accurate
+without making them heavier.
+
+- **A limit per task type, not one for everything.** Today every task shares one complexity limit
+  for a given model size. The benchmark shows the 1B model is reliable at facts and rewording but
+  shaky at translation and extraction. A small table of limits per task type, set from benchmark
+  results, is still just a lookup, and it would have caught several of the weak answers that got
+  through.
+- **Tune the limits from feedback instead of by hand.** A thumbs-down button on local answers,
+  together with the judge scores from the benchmark, is enough to nudge each task's limit up or down
+  over time. That's a running count per task type, not a model.
+- **A cheap check on the local answer.** Some failures only show up in the output: an answer far
+  shorter than what was asked for, one that repeats itself, or one that drops part of the request.
+  Simple checks on the answer (its length against the request, whether the prompt's key terms
+  appear) could flag a doubtful local answer and quietly retry it in the cloud. The routing decision
+  stays cheap; only the doubtful cases pay for a second call.
+- **Fix the rules where they're known to miss.** All three routing misses were short, harmless
+  requests: a question about a Python function, a one-line SQL query and a short email. A "short
+  code question" rule and a "short message" rule would cover them, and a larger labelled prompt set
+  would show the next gaps before users do.
+- **A tiny learned scorer, only if the rules stop scaling.** If the rule list grows unwieldy, a
+  logistic regression over the signals the rules already compute (task keywords, input length,
+  requested length, detail cues) would replace hand-picked weights with fitted ones. It's still a
+  weighted sum that runs in microseconds, and its weights still explain each decision.
 
 ## Try it
 

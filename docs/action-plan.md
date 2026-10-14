@@ -211,7 +211,7 @@ Do these **after** the DEV article is live, a day or so apart.
 > **GreenRoute — local-first LLM router** · Python, FastAPI, Ollama, Gemini API · github.com/ironman2cool/greenroute
 > - Built a local-first LLM router (Python, FastAPI) that classifies each prompt and runs seven device and complexity checks to choose between an on-device model (Ollama, Llama 3.2 1B) and the cloud (Gemini), with a streaming web UI that explains every routing decision.
 > - Benchmarked it on 60 hand-labelled prompts with real models and an LLM judge: 95% routing agreement; 58% of requests kept on-device, with 86% of those answers judged acceptable vs 17% for the prompts it sent to the cloud.
-> - Designed a cited energy/water/CO₂e estimator that nets out local device power (est. 48% less energy and 58% less water than all-cloud; break-even at ~136 W); 63 automated tests and CI.
+> - Designed a cited energy/water/CO₂e estimator that nets out local device power (est. 48% less energy and 58% less water than all-cloud; break-even at ~136 W); 66 automated tests and CI.
 > - Published a technical write-up: ⟨Towards AI or DEV link⟩
 
 - [ ] LinkedIn profile → **Add section → Projects**: add GreenRoute with the repo link. Then add

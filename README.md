@@ -59,7 +59,7 @@ the cloud by default wastes energy and water for no gain.
   figures — net of the local device's own electricity use.
 - **Guided setup** — detects your hardware, recommends a model size, and offers to install Ollama,
   start it, or download a model, from the page or the terminal.
-- **Benchmark** of 60 labelled prompts with real models and an LLM judge, plus 63 tests in CI.
+- **Benchmark** of 60 labelled prompts with real models and an LLM judge, plus 66 tests in CI.
 
 ## How it works
 
@@ -106,6 +106,11 @@ Water used by power plants is excluded on both sides.
 You need **Python 3.10+** and a free **Gemini API key** from <https://aistudio.google.com/apikey>.
 Ollama is optional: without it, everything routes to the cloud.
 
+**Use your own key.** The repo ships no key: `backend/.env.example` has an empty
+`GEMINI_API_KEY=`, and the start scripts ask for yours and save it to `backend/.env`, which git
+ignores. Your key stays on your machine and is only sent to Google. A test in CI fails the build if
+a `.env` file or anything that looks like an API key is ever committed.
+
 **Windows:** double-click `backend/start.bat`.
 **macOS / Linux:** `./backend/start.sh`.
 
@@ -149,7 +154,7 @@ Settings live in `backend/.env` (see [`.env.example`](backend/.env.example)).
 ```bash
 cd backend
 pip install -r requirements-dev.txt
-python -m pytest -q                      # 63 tests, no models or network needed
+python -m pytest -q                      # 66 tests, no models or network needed
 python -m benchmark.run_benchmark        # real benchmark (needs Ollama + a Gemini key)
 python -m benchmark.summarize            # tables in benchmark/results/, charts in docs/images/
 ```
@@ -170,7 +175,9 @@ backend/
 ## Limitations
 
 - The classifier is rules-based: it misses phrasing it has no rule for, and it errs toward the
-  cloud when unsure. A small learned classifier is the obvious next step.
+  cloud when unsure. Next steps that keep the decision cheap: a complexity limit per task type,
+  limits tuned from user feedback, and a quick check on each local answer that retries doubtful
+  ones in the cloud.
 - Impact figures are estimates built from a published median and an assumed device power draw.
 - On a laptop CPU, a 1B model is often *slower* than a fast cloud model; the case for local is
   energy, water, privacy and offline use, not speed.

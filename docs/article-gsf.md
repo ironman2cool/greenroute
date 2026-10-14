@@ -74,10 +74,12 @@ every raw answer, so the numbers can be checked or rerun.
 
 ## What next
 
-The weakest number is the local power draw. Measuring it with RAPL counters on Linux or
-`powermetrics` on macOS would replace the assumption. Grid intensity also changes by the hour, so
-a carbon-aware router could make a different call when the grid is running on coal than when it is
-running on solar. Finally, the same decision matters even more on phones, where the battery is the
-constraint and NPUs make small models cheap.
+The routing decision should stay cheap and explainable, so the improvements are about better
+rules, not heavier ones. A complexity limit per task type, rather than one shared limit, would
+reflect that a 1B model handles facts and rewording well but translation and extraction poorly.
+Those limits can be tuned from a simple thumbs-down count per task. A cheap check on each local
+answer (is it far shorter than requested, or missing the prompt's key terms?) could send only the
+doubtful cases to the cloud. If the rules ever stop scaling, a logistic regression over the same
+signals would still be a weighted sum that runs in microseconds and explains itself.
 
 Code, data and the full write-up: https://github.com/ironman2cool/greenroute
