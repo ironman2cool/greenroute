@@ -26,7 +26,7 @@ you to stand behind every claim, and interviewers will ask about it.
 - [ ] Keep the **AI disclosure** box near the top. Medium and Towards AI require it within the first
       two paragraphs.
 - [ ] If you changed `article.md`, rebuild the DEV and Medium copies from it: in the `backend`
-      folder run `.venv\Scripts\python toolsuild_article_copies.py`. (Or send me the edited
+      folder run `.venv\Scripts\python tools\build_article_copies.py`. (Or send me the edited
       file and I'll do it.)
 
 **0.2 Polish the GitHub repo** (github.com/ironman2cool/greenroute)
